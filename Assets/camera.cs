@@ -35,7 +35,7 @@ public class camera: MonoBehaviour
             byte[] data = shoot_SS();
 
             sendMsg_py();
-
+            Debug.Log(pos + ":" + rot);
             //Debug.Log("saving" + Application.dataPath + "/SavedScreen.png");
             //File.WriteAllBytes(Application.dataPath + "/SavedScreen.png", data);
         }
