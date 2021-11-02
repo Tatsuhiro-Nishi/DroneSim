@@ -34,8 +34,8 @@ public class camera: MonoBehaviour
             next_time = Time.time + interval_time;
             byte[] data = shoot_SS();
 
-            sendMsg_py();
-            Debug.Log(pos + ":" + rot);
+            //sendMsg_py();
+            socket_send();
             //Debug.Log("saving" + Application.dataPath + "/SavedScreen.png");
             //File.WriteAllBytes(Application.dataPath + "/SavedScreen.png", data);
         }
@@ -94,7 +94,8 @@ public class camera: MonoBehaviour
         client.Connect(remote);
         client.Send(message, message.Length);
         client.Close();*/
-
+        Debug.Log("sended");
+        Task.Delay(1000);
         var Client = new UdpClient(1900);                           // UdpClient作成（ポート番号は適当に割当）
         var RequestData = Encoding.UTF8.GetBytes("Request");   // 適当なリクエストデータ
         var ServerEp = new IPEndPoint(IPAddress.Any, 0);        // サーバ（通信相手）のエンドポイントServerEp作成（IP/Port未指定）

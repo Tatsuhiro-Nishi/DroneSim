@@ -63,6 +63,7 @@ public class Move : MonoBehaviour
 			transform.Rotate(0f, -0.5f, 0f);
 		}
 		//ListenMsg_py();
+		ListenMessage();
 	}
 
 	void OnTriggerEnter(Collider other)
@@ -140,5 +141,14 @@ public class Move : MonoBehaviour
 		//Debug.Log(receiveBytes);
 		// Receive イベント を実行
 		//this.OnRecieve(data);
+
+		var Server = new UdpClient(8000);                                       // 待ち受けポートを指定してUdpClient生成
+		var ResponseData = Encoding.ASCII.GetBytes("SomeResponseData");         // 適当なレスポンスデータ
+		var ClientEp = new IPEndPoint(IPAddress.Any, 0);                    // クライアント（通信相手）のエンドポイントClientEp作成（IP/Port未指定）
+		Server.Client.ReceiveTimeout = 1000;
+		var ClientRequestData = Server.Receive(ref ClientEp);               // クライアントからのパケット受信、ClientEpにクライアントのエンドポイント情報が入る
+		var ClientRequest = Encoding.ASCII.GetString(ClientRequestData);
+
+		Debug.Log("Recived " + ClientRequest+ "from " + ClientEp.Address.ToString()+", sending response");    // ClientEp.Address：クライアントIP
 	}
 }
