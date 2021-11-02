@@ -95,13 +95,13 @@ public class camera: MonoBehaviour
         client.Send(message, message.Length);
         client.Close();*/
         Debug.Log("sended");
-        Task.Delay(1000);
+        Task.Delay(50000);
         var Client = new UdpClient(1900);                           // UdpClient作成（ポート番号は適当に割当）
         var RequestData = Encoding.UTF8.GetBytes("Request");   // 適当なリクエストデータ
         var ServerEp = new IPEndPoint(IPAddress.Any, 0);        // サーバ（通信相手）のエンドポイントServerEp作成（IP/Port未指定）
 
         Client.EnableBroadcast = true;                          // ブロードキャスト有効化
-        Client.Send(RequestData, RequestData.Length, new IPEndPoint(IPAddress.Broadcast, 8888)); // ポート8888にブロードキャスト送信
+        Client.Send(RequestData, RequestData.Length, new IPEndPoint(IPAddress.Broadcast, 8080)); // ポート8888にブロードキャスト送信
         Client.Close();
     }
 }

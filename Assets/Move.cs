@@ -24,10 +24,20 @@ public class Move : MonoBehaviour
 	public float waterDrag = 5000.0f;
 	public float defaultDrag = 5.0f;
 
+	UdpClient Server;
+	byte[] ResponseData;         // 適当なレスポンスデータ
+	IPEndPoint ClientEp;                    // クライアント（通信相手）のエンドポイントClientEp作成（IP/Port未指定）
+	
+
 	void Start()
 	{
 		rb = gameObject.GetComponent<Rigidbody>();
 		defaultDrag = rb.drag;
+		ListenMessage();
+
+		/*Server = new UdpClient(8080);
+		ResponseData = Encoding.ASCII.GetBytes("SomeResponseData");         // 適当なレスポンスデータ
+		ClientEp = new IPEndPoint(IPAddress.Any, 0);*/
 	}
 
 	// Update is called once per frame
@@ -63,7 +73,13 @@ public class Move : MonoBehaviour
 			transform.Rotate(0f, -0.5f, 0f);
 		}
 		//ListenMsg_py();
-		ListenMessage();
+		//ListenMessage();
+
+		//Server.Client.ReceiveTimeout = 1000;
+		//var ClientRequestData = Server.Receive(ref ClientEp);               // クライアントからのパケット受信、ClientEpにクライアントのエンドポイント情報が入る
+		//var ClientRequest = Encoding.ASCII.GetString(ClientRequestData);
+
+		//Debug.Log("Recived " + ClientRequest + "from " + ClientEp.Address.ToString() + ", sending response");    // ClientEp.Address：クライアントIP
 	}
 
 	void OnTriggerEnter(Collider other)
@@ -142,10 +158,10 @@ public class Move : MonoBehaviour
 		// Receive イベント を実行
 		//this.OnRecieve(data);
 
-		var Server = new UdpClient(8000);                                       // 待ち受けポートを指定してUdpClient生成
+		var Server = new UdpClient(8080);                                       // 待ち受けポートを指定してUdpClient生成
 		var ResponseData = Encoding.ASCII.GetBytes("SomeResponseData");         // 適当なレスポンスデータ
 		var ClientEp = new IPEndPoint(IPAddress.Any, 0);                    // クライアント（通信相手）のエンドポイントClientEp作成（IP/Port未指定）
-		Server.Client.ReceiveTimeout = 1000;
+		Server.Client.ReceiveTimeout = 10000;
 		var ClientRequestData = Server.Receive(ref ClientEp);               // クライアントからのパケット受信、ClientEpにクライアントのエンドポイント情報が入る
 		var ClientRequest = Encoding.ASCII.GetString(ClientRequestData);
 
