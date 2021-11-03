@@ -13,6 +13,8 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using System.Text;
+using UniRx;
+using UnityEngine.UI;
 
 public class Move : MonoBehaviour
 {
@@ -24,20 +26,20 @@ public class Move : MonoBehaviour
 	public float waterDrag = 5000.0f;
 	public float defaultDrag = 5.0f;
 
-	UdpClient Server;
-	byte[] ResponseData;         // 適当なレスポンスデータ
-	IPEndPoint ClientEp;                    // クライアント（通信相手）のエンドポイントClientEp作成（IP/Port未指定）
-	
+	private UdpClient Server;
+	private byte[] ResponseData;         // 適当なレスポンスデータ
+	private IPEndPoint ClientEp;                    // クライアント（通信相手）のエンドポイントClientEp作成（IP/Port未指定）
+	private Subject<string> subject = new Subject<string>();
+	[SerializeField] Text message;
 
 	void Start()
 	{
 		rb = gameObject.GetComponent<Rigidbody>();
 		defaultDrag = rb.drag;
-		ListenMessage();
+		//ListenMessage();
 
-		/*Server = new UdpClient(8080);
-		ResponseData = Encoding.ASCII.GetBytes("SomeResponseData");         // 適当なレスポンスデータ
-		ClientEp = new IPEndPoint(IPAddress.Any, 0);*/
+		Server = new UdpClient(8080);
+		Server.BeginReceive(OnReceived, Server);
 	}
 
 	// Update is called once per frame
@@ -72,14 +74,6 @@ public class Move : MonoBehaviour
 			//transform.position -= transform.right * speed * Time.deltaTime;
 			transform.Rotate(0f, -0.5f, 0f);
 		}
-		//ListenMsg_py();
-		//ListenMessage();
-
-		//Server.Client.ReceiveTimeout = 1000;
-		//var ClientRequestData = Server.Receive(ref ClientEp);               // クライアントからのパケット受信、ClientEpにクライアントのエンドポイント情報が入る
-		//var ClientRequest = Encoding.ASCII.GetString(ClientRequestData);
-
-		//Debug.Log("Recived " + ClientRequest + "from " + ClientEp.Address.ToString() + ", sending response");    // ClientEp.Address：クライアントIP
 	}
 
 	void OnTriggerEnter(Collider other)
@@ -128,36 +122,9 @@ public class Move : MonoBehaviour
 		myProcess.WaitForExit();
 		myProcess.Close();
 	}
-
-
 	public void ListenMessage()
     {
         byte[] bytes = new byte[256];
-		// 接続ソケットの準備
-		//IPEndPoint local = new IPEndPoint(IPAddress.Any, 1900);
-		//IPEndPoint remote = new IPEndPoint(IPAddress.Any, 0);
-		//UdpClient Server = new UdpClient(8888);
-
-		//var data = new byte[4];
-		//client.Receive(data, 4, SocketFlags.None);
-
-		//var ClientEp = new IPEndPoint(IPAddress.Any, 0);                    // クライアント（通信相手）のエンドポイントClientEp作成（IP/Port未指定）
-		//var ClientRequestData = Server.Receive(ref ClientEp);               // クライアントからのパケット受信、ClientEpにクライアントのエンドポイント情報が入る
-		//var ClientRequest = Encoding.ASCII.GetString(ClientRequestData);
-		//var server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-		//server.Bind(new IPEndPoint(IPAddress.Any, 10408));
-
-		// データ受信待機
-		//var result = client.Receive(bytes);
-		//byte[] receiveBytes = client.Receive(ref remote);
-
-		// 受信したデータを変換
-		//var data = Encoding.UTF8.GetString(result.Buffer);
-
-		//Debug.Log(receiveBytes);
-		// Receive イベント を実行
-		//this.OnRecieve(data);
-
 		var Server = new UdpClient(8080);                                       // 待ち受けポートを指定してUdpClient生成
 		var ResponseData = Encoding.ASCII.GetBytes("SomeResponseData");         // 適当なレスポンスデータ
 		var ClientEp = new IPEndPoint(IPAddress.Any, 0);                    // クライアント（通信相手）のエンドポイントClientEp作成（IP/Port未指定）
@@ -166,5 +133,28 @@ public class Move : MonoBehaviour
 		var ClientRequest = Encoding.ASCII.GetString(ClientRequestData);
 
 		Debug.Log("Recived " + ClientRequest+ "from " + ClientEp.Address.ToString()+", sending response");    // ClientEp.Address：クライアントIP
+	}
+
+	private void OnReceived(System.IAsyncResult result)
+	{
+		UdpClient getUdp = (UdpClient)result.AsyncState;
+		IPEndPoint ipEnd = null;
+
+		byte[] getByte = getUdp.EndReceive(result, ref ipEnd);
+		var message = Encoding.UTF8.GetString(getByte);
+		Control(message);
+		//subject.OnNext(message);
+		getUdp.BeginReceive(OnReceived, getUdp);
+	}
+
+	private void Control(String message)
+    {
+		Debug.Log("message " + message);
+
+    }
+
+	private void OnDestroy()
+	{
+		Server.Close();
 	}
 }

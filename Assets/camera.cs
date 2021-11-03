@@ -87,15 +87,8 @@ public class camera: MonoBehaviour
 
     private void socket_send()
     {
-        /*IPEndPoint remote = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 1900);
-        var message = Encoding.UTF8.GetBytes("Hello world !");
-
-        UdpClient client = new UdpClient(5353);
-        client.Connect(remote);
-        client.Send(message, message.Length);
-        client.Close();*/
-        Debug.Log("sended");
-        Task.Delay(50000);
+        //Debug.Log("sended");
+        Task.Delay(5000);
         var Client = new UdpClient(1900);                           // UdpClient作成（ポート番号は適当に割当）
         var RequestData = Encoding.UTF8.GetBytes("Request");   // 適当なリクエストデータ
         var ServerEp = new IPEndPoint(IPAddress.Any, 0);        // サーバ（通信相手）のエンドポイントServerEp作成（IP/Port未指定）
