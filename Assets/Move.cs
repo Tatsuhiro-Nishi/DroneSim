@@ -25,12 +25,12 @@ public class Move : MonoBehaviour
 	string waterTag = "water";
 	public float waterDrag = 5000.0f;
 	public float defaultDrag = 5.0f;
+	public string message;
 
 	private UdpClient Server;
 	private byte[] ResponseData;         // 適当なレスポンスデータ
 	private IPEndPoint ClientEp;                    // クライアント（通信相手）のエンドポイントClientEp作成（IP/Port未指定）
 	private Subject<string> subject = new Subject<string>();
-	[SerializeField] Text message;
 
 	void Start()
 	{
@@ -38,7 +38,7 @@ public class Move : MonoBehaviour
 		defaultDrag = rb.drag;
 		//ListenMessage();
 
-		Server = new UdpClient(8080);
+		Server = new UdpClient(1901);
 		Server.BeginReceive(OnReceived, Server);
 	}
 
@@ -74,6 +74,8 @@ public class Move : MonoBehaviour
 			//transform.position -= transform.right * speed * Time.deltaTime;
 			transform.Rotate(0f, -0.5f, 0f);
 		}
+
+		ROVmove();
 	}
 
 	void OnTriggerEnter(Collider other)
@@ -125,7 +127,7 @@ public class Move : MonoBehaviour
 	public void ListenMessage()
     {
         byte[] bytes = new byte[256];
-		var Server = new UdpClient(8080);                                       // 待ち受けポートを指定してUdpClient生成
+		var Server = new UdpClient(1900);                                       // 待ち受けポートを指定してUdpClient生成
 		var ResponseData = Encoding.ASCII.GetBytes("SomeResponseData");         // 適当なレスポンスデータ
 		var ClientEp = new IPEndPoint(IPAddress.Any, 0);                    // クライアント（通信相手）のエンドポイントClientEp作成（IP/Port未指定）
 		Server.Client.ReceiveTimeout = 10000;
@@ -141,17 +143,34 @@ public class Move : MonoBehaviour
 		IPEndPoint ipEnd = null;
 
 		byte[] getByte = getUdp.EndReceive(result, ref ipEnd);
-		var message = Encoding.UTF8.GetString(getByte);
-		Control(message);
-		//subject.OnNext(message);
+		message = Encoding.UTF8.GetString(getByte);
+		//Control(message);
+		Debug.Log("message " + message);
+		subject.OnNext(message);
 		getUdp.BeginReceive(OnReceived, getUdp);
 	}
 
-	private void Control(String message)
+	private void ROVmove()
     {
 		Debug.Log("message " + message);
+		float theta = float.Parse(message);
 
-    }
+		if(Math.Abs(theta) < 15)
+        {
+			transform.Translate(0f, 0f, 0.005f);
+		}
+		
+		else if(theta > 15)
+        {
+			transform.Rotate(0f, -0.1f, 0f);
+			Debug.Log("theta > 15");
+		}
+		else if (theta < -15)
+		{
+			transform.Rotate(0f, 0.1f, 0f);
+			Debug.Log("theta < -15");
+		}
+	}
 
 	private void OnDestroy()
 	{

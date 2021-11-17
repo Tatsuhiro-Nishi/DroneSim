@@ -29,14 +29,15 @@ public class camera: MonoBehaviour
         {
             Vector3 pos = GameObject.Find("Cube").transform.position;
             Vector3 rot = GameObject.Find("Cube").transform.localEulerAngles;
+            var direction = transform.forward;
 
-            Debug.Log(pos + ":" + rot);
+            //Debug.Log(direction);
             next_time = Time.time + interval_time;
             byte[] data = shoot_SS();
 
+            string message = pos.x + "," + pos.y + "," + pos.z + "," + rot.y;
             //sendMsg_py();
-            socket_send();
-            //Debug.Log("saving" + Application.dataPath + "/SavedScreen.png");
+            socket_send(message);
             //File.WriteAllBytes(Application.dataPath + "/SavedScreen.png", data);
         }
     }
@@ -85,12 +86,12 @@ public class camera: MonoBehaviour
         return bytes;
     }
 
-    private void socket_send()
+    private void socket_send(string message)
     {
         //Debug.Log("sended");
         Task.Delay(5000);
         var Client = new UdpClient(1900);                           // UdpClient作成（ポート番号は適当に割当）
-        var RequestData = Encoding.UTF8.GetBytes("Request");   // 適当なリクエストデータ
+        var RequestData = Encoding.UTF8.GetBytes(message);   // 適当なリクエストデータ
         var ServerEp = new IPEndPoint(IPAddress.Any, 0);        // サーバ（通信相手）のエンドポイントServerEp作成（IP/Port未指定）
 
         Client.EnableBroadcast = true;                          // ブロードキャスト有効化
