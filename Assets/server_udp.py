@@ -100,7 +100,7 @@ class ROV_info:
         print("route_num : "+ str(self.route_num))
         print("sqrt : "+ str(math.sqrt((target_route[self.route_num][0] - ROV_p[0])**2 + (target_route[self.route_num][1] - ROV_p[1])**2)))
         if math.sqrt((target_route[self.route_num][0] - ROV_p[0])**2 
-                     + (target_route[self.route_num][1] - ROV_p[1])**2) < 1:
+                     + (target_route[self.route_num][1] - ROV_p[1])**2) < 0.5:
             self.route_num += 1
             print("route_num2 : "+ str(self.route_num))
             try :

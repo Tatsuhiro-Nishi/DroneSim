@@ -76,6 +76,32 @@ public class Move : MonoBehaviour
 		}
 
 		ROVmove();
+		
+	}
+
+	private void ROVmove()
+	{
+		float theta = float.Parse(message);
+
+		if (Math.Abs(theta) <= 360)
+		{
+			if (Math.Abs(theta) < 15)
+			{
+				transform.Translate(0f, 0f, 0.01f);
+			}
+
+			else if (theta > 15)
+			{
+				transform.Rotate(0f, -0.5f, 0f);
+				Debug.Log("theta > 15");
+			}
+			else if (theta < -15)
+			{
+				transform.Rotate(0f, 0.5f, 0f);
+				Debug.Log("theta < -15");
+			}
+			//message = "-999";
+		}
 	}
 
 	void OnTriggerEnter(Collider other)
@@ -100,43 +126,6 @@ public class Move : MonoBehaviour
 		}
 	}
 
-	public void ListenMsg_py()
-    {
-		string myPythonApp = "test.py";
-		int x = 2;
-		int y = 5;
-
-		var myProcess = new Process
-		{
-			StartInfo = new ProcessStartInfo("python.exe")
-			{
-				UseShellExecute = false,
-				CreateNoWindow = true,
-				RedirectStandardOutput = true,
-				Arguments = myPythonApp + " " + x + " " + y
-			}
-		};
-
-		myProcess.Start();
-		StreamReader myStreamReader = myProcess.StandardOutput;
-		string myString = myStreamReader.ReadLine();
-		Debug.Log("Msg" + myString);
-		myProcess.WaitForExit();
-		myProcess.Close();
-	}
-	public void ListenMessage()
-    {
-        byte[] bytes = new byte[256];
-		var Server = new UdpClient(1900);                                       // 待ち受けポートを指定してUdpClient生成
-		var ResponseData = Encoding.ASCII.GetBytes("SomeResponseData");         // 適当なレスポンスデータ
-		var ClientEp = new IPEndPoint(IPAddress.Any, 0);                    // クライアント（通信相手）のエンドポイントClientEp作成（IP/Port未指定）
-		Server.Client.ReceiveTimeout = 10000;
-		var ClientRequestData = Server.Receive(ref ClientEp);               // クライアントからのパケット受信、ClientEpにクライアントのエンドポイント情報が入る
-		var ClientRequest = Encoding.ASCII.GetString(ClientRequestData);
-
-		Debug.Log("Recived " + ClientRequest+ "from " + ClientEp.Address.ToString()+", sending response");    // ClientEp.Address：クライアントIP
-	}
-
 	private void OnReceived(System.IAsyncResult result)
 	{
 		UdpClient getUdp = (UdpClient)result.AsyncState;
@@ -144,32 +133,9 @@ public class Move : MonoBehaviour
 
 		byte[] getByte = getUdp.EndReceive(result, ref ipEnd);
 		message = Encoding.UTF8.GetString(getByte);
-		//Control(message);
 		Debug.Log("message " + message);
 		subject.OnNext(message);
 		getUdp.BeginReceive(OnReceived, getUdp);
-	}
-
-	private void ROVmove()
-    {
-		Debug.Log("message " + message);
-		float theta = float.Parse(message);
-
-		if(Math.Abs(theta) < 15)
-        {
-			transform.Translate(0f, 0f, 0.005f);
-		}
-		
-		else if(theta > 15)
-        {
-			transform.Rotate(0f, -0.1f, 0f);
-			Debug.Log("theta > 15");
-		}
-		else if (theta < -15)
-		{
-			transform.Rotate(0f, 0.1f, 0f);
-			Debug.Log("theta < -15");
-		}
 	}
 
 	private void OnDestroy()
