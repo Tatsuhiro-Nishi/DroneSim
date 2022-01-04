@@ -43,19 +43,30 @@ class Timer(object):
         self.msecs = self.end - self.start * 1000
         #print('elapsed time: %f msecs' % self.msecs)
 
+start=0
+end = 0 
 
 class UDPHandler(socketserver.BaseRequestHandler):  
+        
     def handle(self):
         print("-------------------------------------")
         print("start listening")
+        start = time.time()
+        
         self.message = self.request[0].strip()
         print(self.message)
+        end = time.time() - start
+        print("receive time : "+str(end))
         information = rov_info.calc_inf(self.message.decode())
 
         call = str(information)
+        send_time = str(time.time())
+        text = call + "," + send_time
         socket = self.request[1]
-        socket.sendto(call.encode("utf-8"), (self.client_address[0], self.client_address[1]+1))
+    
+        socket.sendto(text.encode("utf-8"), (self.client_address[0], self.client_address[1]+1))
         print("{} wrote:".format(self.client_address))
+        
         #socket.settimeout(1)
 
 class ROV_info: 

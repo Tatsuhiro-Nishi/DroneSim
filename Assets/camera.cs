@@ -6,6 +6,7 @@ using System.Diagnostics;
 
 using UnityEngine;
 using Debug = UnityEngine.Debug;
+using System.Threading;
 
 using System.Net;
 using System.Net.Sockets;
@@ -19,9 +20,10 @@ public class camera: MonoBehaviour
 {
     [SerializeField] private Camera _camera;
     private float next_time=0.0f;
-    [SerializeField] private float interval_time = 0.5f;
+    [SerializeField] private float interval_time = 0f;
     private string pyExePath = @"C:/Users/Tatsuhiro Nishi/anaconda3/python.exe";
     [SerializeField] private string myPythonApp = @"C:/Users/Public/Documents/test.py";
+    private int delaytime = 10000;
 
     private void Update()
     {
@@ -36,7 +38,6 @@ public class camera: MonoBehaviour
             byte[] data = shoot_SS();
 
             string message = pos.x + "," + pos.y + "," + pos.z + "," + rot.y;
-            //sendMsg_py();
             socket_send(message);
             //File.WriteAllBytes(Application.dataPath + "/SavedScreen.png", data);
         }
@@ -88,8 +89,9 @@ public class camera: MonoBehaviour
 
     private void socket_send(string message)
     {
-        //Debug.Log("sended");
-        Task.Delay(5000);
+        Debug.Log("delaytime send : " + delaytime);
+        Thread.Sleep(delaytime);
+        delaytime = 0;
         var Client = new UdpClient(1900);                           // UdpClient作成（ポート番号は適当に割当）
         var RequestData = Encoding.UTF8.GetBytes(message);   // 適当なリクエストデータ
         var ServerEp = new IPEndPoint(IPAddress.Any, 0);        // サーバ（通信相手）のエンドポイントServerEp作成（IP/Port未指定）
