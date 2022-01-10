@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 //↑上の二つのusingは使わないから本当はいらないよ。
 using UnityEngine;
+using UnityEditor;
 //Moveと言うクラスで書いてくよ
 using Debug = UnityEngine.Debug;
 
@@ -85,26 +86,38 @@ public class Move : MonoBehaviour
 
 		string[] message_arr = message.Split(',');
 		float theta = float.Parse(message_arr[0]);
-		Debug.Log("send_time " + message_arr[1]);
+		Debug.Log("theta " + message_arr[0]);
 		Debug.Log("recv_time " + DateTimeOffset.Now.ToUnixTimeSeconds());
 		if (Math.Abs(theta) <= 360)
 		{
 			if (Math.Abs(theta) < 5)
 			{
-				transform.Translate(0f, 0f, 0.02f);
+				transform.Translate(0f, 0f, 0.015f);
+				Debug.Log("go");
 			}
 
-			else if (theta < 180 && theta >= 5 )
+			else if (theta < 10 && theta >= 5)
 			{
-				transform.Rotate(0f, -0.05f, 0f);
-				Debug.Log("theta < -15");
+				transform.Rotate(0f, -0.1f, 0f, Space.Self);
+				Debug.Log("left turn");
 			}
-			else if (theta > -180 && theta <= 0)
+			else if (theta > -10 && theta <= -5)
 			{
-				transform.Rotate(0f, 0.05f, 0f);
-				Debug.Log("theta < -15");
+				transform.Rotate(0f, 0.1f, 0f, Space.Self);
+				Debug.Log("right turn");
 			}
 
+			else if (theta <= 180 && theta >= 10)
+			{
+				transform.Rotate(0f, -0.4f, 0f, Space.Self);
+				Debug.Log("left turn");
+			}
+			else if (theta > -180 && theta <= -10)
+			{
+				transform.Rotate(0f, 0.4f, 0f, Space.Self);
+				Debug.Log("right turn");
+			}
+			
 			/*else if (theta > 5 && theta < 10)
 			{
 				transform.Translate(0f, 0f, 0.02f);
@@ -130,6 +143,7 @@ public class Move : MonoBehaviour
 
 			//message = "-999";
 		}
+		if (theta == -999) { EditorApplication.Beep(); }
 	}
 
 	void OnTriggerEnter(Collider other)
@@ -162,7 +176,7 @@ public class Move : MonoBehaviour
 
 		byte[] getByte = getUdp.EndReceive(result, ref ipEnd);
 
-		Thread.Sleep(delaytime);
+		//Thread.Sleep(delaytime);
 		delaytime = 0;
 
 		message = Encoding.UTF8.GetString(getByte);

@@ -27,6 +27,7 @@ public class camera: MonoBehaviour
 
     private void Update()
     {
+        System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
         if (Time.time >= next_time)
         {
             Vector3 pos = GameObject.Find("Cube").transform.position;
@@ -35,7 +36,13 @@ public class camera: MonoBehaviour
 
             //Debug.Log(direction);
             next_time = Time.time + interval_time;
-            byte[] data = shoot_SS();
+
+            sw.Start();
+            Thread.Sleep(30);
+            //byte[] data = shoot_SS();
+            sw.Stop();
+            TimeSpan ts = sw.Elapsed;
+            Debug.Log(ts);
 
             string message = pos.x + "," + pos.y + "," + pos.z + "," + rot.y;
             socket_send(message);
@@ -89,15 +96,18 @@ public class camera: MonoBehaviour
 
     private void socket_send(string message)
     {
-        Debug.Log("delaytime send : " + delaytime);
-        Thread.Sleep(delaytime);
+        //Debug.Log("delaytime send : " + delaytime);
+        //Thread.Sleep(delaytime);
         delaytime = 0;
         var Client = new UdpClient(1900);                           // UdpClient作成（ポート番号は適当に割当）
         var RequestData = Encoding.UTF8.GetBytes(message);   // 適当なリクエストデータ
-        var ServerEp = new IPEndPoint(IPAddress.Any, 0);        // サーバ（通信相手）のエンドポイントServerEp作成（IP/Port未指定）
+        //var ServerEp = new IPEndPoint(IPAddress.Any, 0);        // サーバ（通信相手）のエンドポイントServerEp作成（IP/Port未指定）
 
-        Client.EnableBroadcast = true;                          // ブロードキャスト有効化
-        Client.Send(RequestData, RequestData.Length, new IPEndPoint(IPAddress.Broadcast, 8080)); // ポート8888にブロードキャスト送信
+        //Client.EnableBroadcast = true;                          // ブロードキャスト有効化
+
+        // ポート8080に送信
+        Client.Send(RequestData, RequestData.Length, new IPEndPoint(IPAddress.Parse("192.168.120.3"), 8080));
+        //Client.Send(RequestData, RequestData.Length, new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8080));
         Client.Close();
     }
 }
