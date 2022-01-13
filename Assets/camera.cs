@@ -23,7 +23,6 @@ public class camera: MonoBehaviour
     [SerializeField] private float interval_time = 0f;
     private string pyExePath = @"C:/Users/Tatsuhiro Nishi/anaconda3/python.exe";
     [SerializeField] private string myPythonApp = @"C:/Users/Public/Documents/test.py";
-    private int delaytime = 10000;
 
     private void Update()
     {
@@ -34,6 +33,8 @@ public class camera: MonoBehaviour
             Vector3 rot = GameObject.Find("Cube").transform.localEulerAngles;
             var direction = transform.forward;
 
+            Vector3 buoy_pos = GameObject.Find("camera").transform.position;
+
             //Debug.Log(direction);
             next_time = Time.time + interval_time;
 
@@ -42,34 +43,25 @@ public class camera: MonoBehaviour
             //byte[] data = shoot_SS();
             sw.Stop();
             TimeSpan ts = sw.Elapsed;
-            Debug.Log(ts);
 
-            string message = pos.x + "," + pos.y + "," + pos.z + "," + rot.y;
+            double buoy2pos = Math.Sqrt(Math.Pow(pos.x - buoy_pos.x, 2) 
+                                     + Math.Pow(pos.y - buoy_pos.y, 2) 
+                                     + Math.Pow(pos.z - buoy_pos.z, 2));
+            Debug.Log("buoy2pos : " + buoy2pos);
+
+            System.Random myRand = new System.Random();
+            double[] ErrorRate = new double[] { myRand.NextDouble(), myRand.NextDouble(), myRand.NextDouble() };
+            double[] Acoustic_pos = new double[3];
+            Acoustic_pos[0] = pos.x + (buoy2pos * ErrorRate[1] * 0.01);
+            Acoustic_pos[1] = pos.y + (buoy2pos * ErrorRate[2] * 0.01);
+            Acoustic_pos[2] = pos.z + (buoy2pos * ErrorRate[0] * 0.01);
+
+            Debug.Log("Now pos" + Acoustic_pos[0] + ", " + Acoustic_pos[1] + ", " + Acoustic_pos[2] + ", ");
+
+            string message = Acoustic_pos[0] + "," + Acoustic_pos[1] + "," + Acoustic_pos[2] + "," + rot.y;
             socket_send(message);
             //File.WriteAllBytes(Application.dataPath + "/SavedScreen.png", data);
         }
-    }
-
-    public void sendMsg_py()
-    {
-        int x = 2;
-        int y = 5;
-
-        //外部プロセスの設定
-        ProcessStartInfo processStartInfo = new ProcessStartInfo()
-        {
-            FileName = pyExePath, 
-            UseShellExecute = false,
-            CreateNoWindow = true,
-            RedirectStandardOutput = true, 
-            Arguments = myPythonApp + " " + x + " " + y, 
-        };
-        Process process = Process.Start(processStartInfo);
-        StreamReader streamReader = process.StandardOutput;
-        process.WaitForExit();
-        string str = streamReader.ReadLine();
-        process.Close();
-        Debug.Log("Msg" + str);
     }
 
     public byte[] shoot_SS()
@@ -98,7 +90,6 @@ public class camera: MonoBehaviour
     {
         //Debug.Log("delaytime send : " + delaytime);
         //Thread.Sleep(delaytime);
-        delaytime = 0;
         var Client = new UdpClient(1900);                           // UdpClient作成（ポート番号は適当に割当）
         var RequestData = Encoding.UTF8.GetBytes(message);   // 適当なリクエストデータ
         //var ServerEp = new IPEndPoint(IPAddress.Any, 0);        // サーバ（通信相手）のエンドポイントServerEp作成（IP/Port未指定）
