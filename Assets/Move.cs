@@ -44,7 +44,10 @@ public class Move : MonoBehaviour
 		Server = new UdpClient(1901);
 		Server.BeginReceive(OnReceived, Server);
 
-		sw = new StreamWriter("19.csv");
+
+		Vector3 buoy_pos = GameObject.Find("camera").transform.position;
+		string CsvName = Math.Round(buoy_pos.y) + ".csv";
+		sw = new StreamWriter(CsvName);
 		sw.WriteLine("error, position_x, position_y, now_target_x, now_target_y, next_target_x, next_target_y");
 	}
 
@@ -81,8 +84,6 @@ public class Move : MonoBehaviour
 			transform.Rotate(0f, -5f, 0f, Space.Self);
 		}
 		ROVmove();
-
-		//Error_Measure();
 	}
 
 	private void ROVmove()
@@ -120,9 +121,9 @@ public class Move : MonoBehaviour
 				transform.Rotate(0f, 0.4f, 0f, Space.Self);
 				Debug.Log("right turn");
 			}
+			CalcAndWrite_Error(int.Parse(message_arr[1]));
 		}
 		if (theta == -999) { EditorApplication.Beep(); }
-		CalcAndWrite_Error(int.Parse(message_arr[1]));
 	}
 
 
@@ -131,10 +132,17 @@ public class Move : MonoBehaviour
 	private void CalcAndWrite_Error(int route_num)
 	{
 		Vector3 pos = GameObject.Find("Cube").transform.position;
-		double[,] target_route = new double[,] { { -5.0,  5.0 }, { 0.0,  5.0 }, { 5.0,  5.0 },
-									             { -5.0,  0.0 }, { 0.0,  0.0 }, { 5.0,  5.0 },
-									             { -5.0, -5.0 }, { 0.0, -5.0 }, { 5.0, -5.0 } };
-		double error = 0;
+
+        // ç¿ïWëÅå©ï\ÇÃÇ¬Ç‡ÇË
+		// { -5.0,  5.0 }, { 0.0,  5.0 }, { 5.0,  5.0 },
+		// { -5.0,  0.0 }, { 0.0,  0.0 }, { 5.0,  0.0 },
+        // { -5.0, -5.0 }, { 0.0, -5.0 }, { 5.0, -5.0 },
+
+		double[,] target_route = new double[,] { { -5.0, 5.0 }, { 5.0, 5.0 },
+			{ 5.0, 0.0 }, { -5.0, 0.0 }, { -5.0, -5.0 }, { 5.0, -5.0 },
+			{ 5.0, 0.0 }, { -5.0, 0.0 }, { -5.0, 5.0 }};
+
+	double error = 0;
 		if (target_route[route_num - 1, 0] == target_route[route_num, 0]) 
 		{
 			error = target_route[route_num, 0] - pos.x;
@@ -146,7 +154,9 @@ public class Move : MonoBehaviour
 
 		if(before_pos[0] != pos.x | before_pos[1] != pos.z)
         {
-			string txt = error + ", " + pos.x + ", " + pos.z;
+			string txt = error + ", " + pos.x + ", " + pos.z + ", " +
+				target_route[route_num - 1, 0] + ", " + target_route[route_num - 1, 1] + ", " +
+				target_route[route_num, 0] + ", " + target_route[route_num, 1];
 			sw.WriteLine(txt);
 		}
 		before_pos[0] = pos.x;

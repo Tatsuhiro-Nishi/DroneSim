@@ -61,7 +61,8 @@ class UDPHandler(socketserver.BaseRequestHandler):
 
         call = str(information)
         send_time = str(time.time())
-        text = call + "," + send_time
+        route_num = str(rov_info.route_num)
+        text = call + "," + route_num + "," + send_time
         socket = self.request[1]
     
         socket.sendto(text.encode("utf-8"), (self.client_address[0], self.client_address[1]+1))
@@ -71,9 +72,9 @@ class UDPHandler(socketserver.BaseRequestHandler):
 
 class ROV_info: 
     route_num = 0
-    p1,p2,p3 = [-10,10],[0,10],[10,10]
-    p4,p5,p6 = [-10,0],[0,0],[10,0]
-    p7,p8,p9 = [-10,-10],[0,-10],[10,-10]
+    p1,p2,p3 = [-5,5],[0,5],[5,5]
+    p4,p5,p6 = [-5,0],[0,0],[5,0]
+    p7,p8,p9 = [-5,-5],[0,-5],[5,-5]
         
     target_route = np.array([p1,p3,p6,p4,p7,p9,p6,p4,p1])
     #target_route = np.array([p1,p3,p6])
@@ -124,7 +125,7 @@ class ROV_info:
                 elif now_target[1] == next_target[1]:
                     error = now_target[1] - position[1]
                     
-                self.error_list.append(math.abs(error))
+                self.error_list.append(abs(error))
                 self.position_list.append(position)
                 self.now_tgt_list.append(now_target)
                 self.next_tgt_list.append(next_target)

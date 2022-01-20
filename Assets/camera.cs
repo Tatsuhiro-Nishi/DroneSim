@@ -50,7 +50,9 @@ public class camera: MonoBehaviour
             Debug.Log("buoy2pos : " + buoy2pos);
 
             System.Random myRand = new System.Random();
-            double[] ErrorRate = new double[] { myRand.NextDouble(), myRand.NextDouble(), myRand.NextDouble() };
+            double[] ErrorRate = new double[] { 2.0 * myRand.NextDouble() -1,
+                                                2.0 * myRand.NextDouble() -1,
+                                                2.0 * myRand.NextDouble() -1 };
             double[] Acoustic_pos = new double[3];
             Acoustic_pos[0] = pos.x + (buoy2pos * ErrorRate[1] * 0.01);
             Acoustic_pos[1] = pos.y + (buoy2pos * ErrorRate[2] * 0.01);
@@ -97,8 +99,8 @@ public class camera: MonoBehaviour
         //Client.EnableBroadcast = true;                          // ブロードキャスト有効化
 
         // ポート8080に送信
-        Client.Send(RequestData, RequestData.Length, new IPEndPoint(IPAddress.Parse("192.168.120.3"), 8080));
-        //Client.Send(RequestData, RequestData.Length, new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8080));
+        //Client.Send(RequestData, RequestData.Length, new IPEndPoint(IPAddress.Parse("192.168.120.3"), 8080));
+        Client.Send(RequestData, RequestData.Length, new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8080));
         Client.Close();
     }
 }
