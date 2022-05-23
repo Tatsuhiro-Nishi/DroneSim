@@ -21,34 +21,39 @@ public class camera: MonoBehaviour
     [SerializeField] private Camera _camera;
     private float next_time=0.0f;
     [SerializeField] private float interval_time = 0f;
-    private string pyExePath = @"C:/Users/Tatsuhiro Nishi/anaconda3/python.exe";
-    [SerializeField] private string myPythonApp = @"C:/Users/Public/Documents/test.py";
-    private int delaytime = 10000;
 
     private void Update()
     {
-        System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+        System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();  //Stopwatchのオブジェクト作成
         if (Time.time >= next_time)
         {
-            Vector3 pos = GameObject.Find("Cube").transform.position;
-            Vector3 rot = GameObject.Find("Cube").transform.localEulerAngles;
-            var direction = transform.forward;
-
-            //Debug.Log(direction);
             next_time = Time.time + interval_time;
 
-            sw.Start();
+            Vector3 pos = GameObject.Find("Cube").transform.position; //GameObj Cubeの位置を取得
+            Vector3 rot = GameObject.Find("Cube").transform.localEulerAngles; //GameObj Cubeの向きを取得
+
+            // カメラからの画像のバイト配列を取得する時間を計測
+            // メモリの使用量がMAXになる可能性があるので30msの遅延で代用
+            sw.Start();　
             Thread.Sleep(30);
             //byte[] data = shoot_SS();
             sw.Stop();
             TimeSpan ts = sw.Elapsed;
             Debug.Log(ts);
+            /////////////////////////////////////////////////////////////
 
             string message = pos.x + "," + pos.y + "," + pos.z + "," + rot.y;
             socket_send(message);
-            //File.WriteAllBytes(Application.dataPath + "/SavedScreen.png", data);
+            //File.WriteAllBytes(Application.dataPath + "/SavedScreen.png", data); //カメラからの画像を保存
         }
     }
+
+    /// <summary>
+    /// Python Scriptの実行手法(未使用、何かに使えるかもなんで一応残しておく)
+    /// </summary>
+
+    private string pyExePath = @"C:/Users/Tatsuhiro Nishi/anaconda3/python.exe";
+    [SerializeField] private string myPythonApp = @"C:/Users/Public/Documents/test.py";
 
     public void sendMsg_py()
     {
@@ -72,6 +77,7 @@ public class camera: MonoBehaviour
         Debug.Log("Msg" + str);
     }
 
+/*---------Cameraの撮影している画像の取得-----------*/
     public byte[] shoot_SS()
     {
         var rt = new RenderTexture(_camera.pixelWidth, _camera.pixelHeight, 24);
@@ -96,18 +102,12 @@ public class camera: MonoBehaviour
 
     private void socket_send(string message)
     {
-        //Debug.Log("delaytime send : " + delaytime);
-        //Thread.Sleep(delaytime);
-        delaytime = 0;
-        var Client = new UdpClient(1900);                           // UdpClient作成（ポート番号は適当に割当）
-        var RequestData = Encoding.UTF8.GetBytes(message);   // 適当なリクエストデータ
-        //var ServerEp = new IPEndPoint(IPAddress.Any, 0);        // サーバ（通信相手）のエンドポイントServerEp作成（IP/Port未指定）
-
-        //Client.EnableBroadcast = true;                          // ブロードキャスト有効化
+        var Client = new UdpClient(1900);                           // UdpClient作成、ポート番号は自身のポート
+        var RequestData = Encoding.UTF8.GetBytes(message);   // 位置情報または画像の送信
 
         // ポート8080に送信
-        Client.Send(RequestData, RequestData.Length, new IPEndPoint(IPAddress.Parse("192.168.120.3"), 8080));
-        //Client.Send(RequestData, RequestData.Length, new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8080));
-        Client.Close();
+        Client.Send(RequestData, RequestData.Length, new IPEndPoint(IPAddress.Parse("192.168.120.3"), 8080)); //リモートに送信
+        //Client.Send(RequestData, RequestData.Length, new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8080)); //ローカルに送信
+        Client.Close(); //socketを閉じる
     }
 }

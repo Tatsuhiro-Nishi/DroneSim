@@ -1,9 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
-//↑上の二つのusingは使わないから本当はいらないよ。
 using UnityEngine;
 using UnityEditor;
-//Moveと言うクラスで書いてくよ
 using Debug = UnityEngine.Debug;
 
 using System;
@@ -33,7 +31,6 @@ public class Move : MonoBehaviour
 	private byte[] ResponseData;         // 適当なレスポンスデータ
 	private IPEndPoint ClientEp;                    // クライアント（通信相手）のエンドポイントClientEp作成（IP/Port未指定）
 	private Subject<string> subject = new Subject<string>();
-	private int delaytime = 10000;
 
 	void Start()
 	{
@@ -118,54 +115,8 @@ public class Move : MonoBehaviour
 				Debug.Log("right turn");
 			}
 			
-			/*else if (theta > 5 && theta < 10)
-			{
-				transform.Translate(0f, 0f, 0.02f);
-				transform.Rotate(0f, -0.03f, 0f);
-				Debug.Log("theta > 2.5 && theta < 30");
-			}
-			else if (theta < -5 && theta > -10)
-			{
-				transform.Translate(0f, 0f, 0.02f);
-				transform.Rotate(0f, 0.03f, 0f);
-				Debug.Log("theta < -2.5 && theta > -3");
-			}
-			else if (theta > 10)
-			{
-				transform.Rotate(0f, -0.3f, 0f);
-				Debug.Log("theta > 30");
-			}
-			else if (theta < -10)
-			{
-				transform.Rotate(0f, 0.3f, 0f);
-				Debug.Log("theta < -30");
-			}*/
-
-			//message = "-999";
 		}
 		if (theta == -999) { EditorApplication.Beep(); }
-	}
-
-	void OnTriggerEnter(Collider other)
-	{
-		if (other.gameObject.name == waterTag)
-		{
-			// 水の中の抵抗をセット
-			rb.drag = waterDrag;
-			//speed = 2.0f;
-			GetComponent<Renderer>().material.color = Color.red;
-		}
-	}
-
-	void OnTriggerExit(Collider other)
-	{
-		if (other.gameObject.name == waterTag)
-		{
-			// 通常の抵抗をセット
-			rb.drag = defaultDrag;
-			//speed = 4.0f;
-			GetComponent<Renderer>().material.color = Color.green;
-		}
 	}
 
 	private void OnReceived(System.IAsyncResult result)
@@ -175,9 +126,6 @@ public class Move : MonoBehaviour
 		IPEndPoint ipEnd = null;
 
 		byte[] getByte = getUdp.EndReceive(result, ref ipEnd);
-
-		//Thread.Sleep(delaytime);
-		delaytime = 0;
 
 		message = Encoding.UTF8.GetString(getByte);
 		Debug.Log("message " + message);
